@@ -9,7 +9,6 @@ const lineConfig = {
 };
 
 const client = new line.Client(lineConfig);
-
 const KENYAKU_TOKEN = 'kenyaku';
 
 app.post('/webhook', line.middleware(lineConfig), async (req, res) => {
@@ -17,17 +16,22 @@ app.post('/webhook', line.middleware(lineConfig), async (req, res) => {
     await Promise.all(req.body.events.map(handleEvent));
     res.json({ status: 'ok' });
   } catch (err) {
-    console.error(err);
+    console.error('Error:', err);
     res.status(500).end();
   }
 });
 
 async function handleEvent(event) {
+  console.log('Event received:', JSON.stringify(event));
+
   if (event.type === 'follow') {
     const userId = event.source.userId;
+    console.log('Follow event from:', userId);
+    console.log('Referral:', JSON.stringify(event.follow));
 
     const referral = event.follow?.referral;
     const isKenyaku = referral && referral.ref === KENYAKU_TOKEN;
+    console.log('isKenyaku:', isKenyaku);
 
     if (isKenyaku) {
       return client.pushMessage(userId, {
